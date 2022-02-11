@@ -95,6 +95,53 @@ class Game:
         with open(Game.file_path, 'w') as line:
             line.write(json_data)
 
+    def buy_unit(self):
+        data = self.load_json()
+        if(data["contexte"] == "mouvement"):
+            print("\n\n++++ Zone d'achat ++++")
+            print("\t++++ Tapez: ++++")
+            print("\t1 - Pour 5 guerriers = 10 unit")
+            print("\t2 - Pour 5 chasseurs = 20 unit")
+            print("\t3 - Pour 5 magiciens = 30 unit")
+            choix = int(input('Votre choix: '))
+            if(choix == 1):
+                if(data['butin'] >= 10):
+                    data['butin'] -= 10
+                    data['equipe']['guerrier'] += 5
+                    print("Achat efféctué")
+                    print(
+                        f"Vous avez : {data['equipe']['guerrier']} guerriers")
+                    print(f"Votre butin est de {data['butin']}")
+                    self.store_json(data)
+                else:
+                    print("Votre butin est insuffisant")
+            elif(choix == 2):
+                if(data['butin'] >= 20):
+                    data['butin'] -= 20
+                    data['equipe']['chasseur'] += 5
+                    print("Achat efféctué")
+                    print(
+                        f"Vous avez : {data['equipe']['chasseur']} chasseurs")
+                    print(f"Votre butin est de {data['butin']}")
+                    self.store_json(data)
+                else:
+                    print("Votre butin est insuffisant")
+            elif(choix == 3):
+                if(data['butin'] >= 30):
+                    data['butin'] -= 30
+                    data['equipe']['magicien'] += 5
+                    print("Achat efféctué")
+                    print(
+                        f"Vous avez : {data['equipe']['magicien']} magiciens")
+                    print(f"Votre butin est de {data['butin']}")
+                    self.store_json(data)
+                else:
+                    print("Votre butin est insuffisant")
+            else:
+                print("Votre choix est invalide")
+        else:
+            print("Vous ne pouver pas faire d'achat en mode combat")
+
     def start_game(self):
         print("Liste des actions possibles : exit, config, status, flee, start, buy")
         action = input("Faite une action : ")
@@ -107,6 +154,8 @@ class Game:
                 self.status()
             if(action == "start"):
                 self.start()
+            if(action == "buy"):
+                self.buy_unit()
             action = input("Faite une action : ")
 
 
