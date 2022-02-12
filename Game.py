@@ -108,7 +108,8 @@ class Game:
                   str(data['PlayerTeam']["butin"]) + " pièces d'or.")
             print("Votre équipe est composée de :")
             for i in data['PlayerTeam']['equipe']:
-                print(str(data['PlayerTeam']['equipe'][i]['nombre'])+' '+ i +('', 's') [data['PlayerTeam']['equipe'][i]['nombre'] > 1])
+                print(str(data['PlayerTeam']['equipe'][i]['nombre'])+' ' +
+                      i + ('', 's')[data['PlayerTeam']['equipe'][i]['nombre'] > 1])
             if(data['PlayerTeam']["contexte"] == "combat"):
                 print("Vous êtes dans le contexte : " +
                       str(data['PlayerTeam']["contexte"]) + " vous pouvez vous battre ou vous enfuir.")
@@ -180,6 +181,47 @@ class Game:
                 print("Votre choix est invalide")
         else:
             print("Vous ne pouver pas faire d'achat en mode combat")
+
+    def move(self):
+        data = self.load_json()
+        self.context = data['PlayerTeam']['contexte']
+        if (self.context == Game.contexte['mouvement']):
+            # print("E : Est")
+            # print("O : Ouest")
+            # print("S : Sud")
+            # print("N : Nord")
+            # self.direction = input('Direction choisie: ')
+            proba_butin = min(0.2, (self.get_total_chance() / 5)/100)
+            proba_soldat = min(0.1, (self.get_total_chance() / 10)/100)
+            proba_enemie = min(0.2, (self.get_total_chance() / 4)/100)
+            proba_lieu = 1 - (proba_enemie + proba_butin + proba_soldat)
+            if random() <= proba_butin:
+                print("Vous avez trouver 10 piéce d'or")
+                data['PlayerTeam']['butin'] += 10
+            elif proba_butin < random() <= (proba_soldat + proba_butin):
+                print("Vous avez trouver un soldat érant")
+                data['PlayerTeam']['equipe'][self.soldat_errant()]['nombre'] += 1
+            elif (proba_soldat + proba_butin) < random() <= (proba_soldat + proba_butin + proba_enemie):
+                print("Vous avez rencontré un enemie")
+                self.fight()
+            elif (proba_soldat + proba_butin + proba_enemie) < random() <= (proba_soldat + proba_butin + proba_enemie + proba_lieu):
+                print("Vous avez trouver un lieu sûr")
+                # data['PlayerTeam']['butin'] += 10
+
+    def get_total_chance(self) -> int:
+        self.chance_team = 0
+        data = self.load_json()
+        for i in data['PlayerTeam']['equipe']:
+            self.chance_team += data['PlayerTeam']['equipe'][i]['chance'] \
+                * data['PlayerTeam']['equipe'][i]['nombre']
+        return self.chance_team
+
+    # Générer un soldat érrant:
+    def soldat_errant(self) -> str:
+        soldat_errant = choice(list(Game.equipe))
+        for i in Game.equipe:
+            if i == soldat_errant:
+                return soldat_errant
 
     def start_game(self):
         print("Liste des actions possibles : exit, config, status, flee, start, buy, fight")
