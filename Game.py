@@ -108,7 +108,8 @@ class Game:
                   str(data['PlayerTeam']["butin"]) + " pièces d'or.")
             print("Votre équipe est composée de :")
             for i in data['PlayerTeam']['equipe']:
-                print(str(data['PlayerTeam']['equipe'][i]['nombre'])+' '+ i +('', 's') [data['PlayerTeam']['equipe'][i]['nombre'] > 1])
+                print(str(data['PlayerTeam']['equipe'][i]['nombre'])+' ' +
+                      i + ('', 's')[data['PlayerTeam']['equipe'][i]['nombre'] > 1])
             if(data['PlayerTeam']["contexte"] == "combat"):
                 print("Vous êtes dans le contexte : " +
                       str(data['PlayerTeam']["contexte"]) + " vous pouvez vous battre ou vous enfuir.")
@@ -181,6 +182,25 @@ class Game:
         else:
             print("Vous ne pouver pas faire d'achat en mode combat")
 
+    def fight(self):
+        data = self.load_json()
+        players = data['PlayerTeam']['equipe']
+        enemies = data['EnemyTeam']
+        score_players = 0
+        score_enemies = 0
+        for i in players:
+            score_players += players[i]['degat'] * players[i]['nombre']
+        for i in enemies:
+            score_enemies += enemies[i]['degat'] * enemies[i]['nombre']
+        print(f"Votre score est : {score_players}")
+        print(f"Le score enemie est : {score_enemies}")
+        if(score_players > score_enemies):
+            print("Combat gagné")
+        elif(score_players == score_enemies):
+            print("Match nul")
+        else:
+            print("Game over")
+
     def start_game(self):
         print("Liste des actions possibles : exit, config, status, flee, start, buy, fight")
         action = input("Faite une action : ")
@@ -195,6 +215,8 @@ class Game:
                 self.start()
             if(action == "buy"):
                 self.buy_unit()
+            if(action == "fight"):
+                self.fight()
             action = input("Faite une action : ")
 
 
