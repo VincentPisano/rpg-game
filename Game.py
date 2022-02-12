@@ -19,14 +19,51 @@ class Game:
         'magicien': 'magicien',
     }
     info = {
-        'nom': '',
-        'contexte': '',
-        'butin': 0,
-        'equipe': {
-            'guerrier': 0,
-            'chasseur': 0,
-            'magicien': 0,
+        'PlayerTeam': {
+            'nom': None,
+            'contexte': None,
+            'butin': 0,
+            'equipe': {
+                'guerrier': {
+                    'degat': 5,
+                    'chance': 5,
+                    'fuite': 3,
+                    'prix': 10,
+                    'nombre': 0
+                },
+                'chasseur': {
+                    'degat': 2,
+                    'chance': 10,
+                    'fuite': 20,
+                    'prix': 25,
+                    'nombre': 0
+                },
+                'magicien': {
+                    'degat': 4,
+                    'chance': 20,
+                    'fuite': 10,
+                    'prix': 15,
+                    'nombre': 0
+                }
+            },
         },
+        'EnemyTeam': {
+            'orc': {
+                'degat': 5,
+                'loot': 3,
+                'nombre': 1
+            },
+            'goblin': {
+                'degat': 3,
+                'loot': 2,
+                'nombre': 1
+            },
+            'zombie': {
+                'degat': 2,
+                'loot': 1,
+                'nombre': 1
+            },
+        }
     }
 
     def __init__(self) -> None:
@@ -38,19 +75,19 @@ class Game:
     def config(self):
         data = self.load_json()
         self.nom = input("Quel est votre nom de joueur ? ")
-        data['nom'] = self.nom
+        data['PlayerTeam']['nom'] = self.nom
         self.store_json(data)
 
     # fonction start fini
     def start(self):
         data = self.load_json()
-        data['contexte'] = Game.contexte['mouvement']
-        data['butin'] = 40
+        data['PlayerTeam']['contexte'] = Game.contexte['mouvement']
+        data['PlayerTeam']['butin'] = 40
         self.store_json(data)
 
     # fonction flee fini
     def flee(self):
-        if(Game.info["context"] == "combat"):
+        if(Game.info["contexte"] == "combat"):
             my_team = Game.info["equipe"]
             for i in my_team:
                 if(randint(1, Game.score_fuite) == 1):
@@ -65,17 +102,19 @@ class Game:
         if(Game.partie == "Perdu"):
             print("GAME OVER")
         else:
-            print("Votre nom de joueur est : " + data["nom"] + ".")
+            print(f"Votre nom de joueur est : " +
+                  str(data['PlayerTeam']["nom"]) + ".")
             print("Votre butin est de  : " +
-                  str(data["butin"]) + " pièces d'or.")
-            print("Votre équipe est composée de  : " +
-                  str(data["equipe"]) + ".")
-            if(data["contexte"] == "combat"):
+                  str(data['PlayerTeam']["butin"]) + " pièces d'or.")
+            print("Votre équipe est composée de :")
+            for i in data['PlayerTeam']['equipe']:
+                print(str(data['PlayerTeam']['equipe'][i]['nombre'])+' '+ i +('', 's') [data['PlayerTeam']['equipe'][i]['nombre'] > 1])
+            if(data['PlayerTeam']["contexte"] == "combat"):
                 print("Vous êtes dans le contexte : " +
-                      data["contexte"] + " vous pouvez vous battre ou vous enfuir.")
-            if(data["contexte"] == "mouvement"):
+                      str(data['PlayerTeam']["contexte"]) + " vous pouvez vous battre ou vous enfuir.")
+            if(data['PlayerTeam']["contexte"] == "mouvement"):
                 print("Vous êtes dans le contexte : " +
-                      data["contexte"] + " vous pouvez vous déplacer ou acheter des unitées.")
+                      str(data['PlayerTeam']["contexte"]) + " vous pouvez vous déplacer ou acheter des unitées.")
 
     def store_json(self, value: dict):
         if os.path.isfile(Game.file_path):
@@ -88,7 +127,7 @@ class Game:
     def load_json(self) -> dict:
         with open(Game.file_path, 'r+') as line:
             data = json.load(line)
-        return data
+        return dict(data)
 
     def create_json(self, data: dict):
         json_data = json.dumps(data)
@@ -97,43 +136,43 @@ class Game:
 
     def buy_unit(self):
         data = self.load_json()
-        if(data["contexte"] == "mouvement"):
+        if (data['PlayerTeam']["contexte"] == "mouvement"):
             print("\n\n++++ Zone d'achat ++++")
-            print("\t++++ Tapez: ++++")
-            print("\t1 - Pour 5 guerriers = 10 unit")
-            print("\t2 - Pour 5 chasseurs = 20 unit")
-            print("\t3 - Pour 5 magiciens = 30 unit")
+            print("++++ Tapez: ++++")
+            print("\t1 - Pour 1 guerrier = 10 unit")
+            print("\t2 - Pour 1 magicien = 15 unit")
+            print("\t3 - Pour 1 chasseur = 25 unit")
             choix = int(input('Votre choix: '))
-            if(choix == 1):
-                if(data['butin'] >= 10):
-                    data['butin'] -= 10
-                    data['equipe']['guerrier'] += 5
+            if (choix == 1):
+                if (data['PlayerTeam']['butin'] >= 10):
+                    data['PlayerTeam']['butin'] -= 10
+                    data['PlayerTeam']['equipe']['guerrier']['nombre'] += 1
                     print("Achat efféctué")
                     print(
-                        f"Vous avez : {data['equipe']['guerrier']} guerriers")
-                    print(f"Votre butin est de {data['butin']}")
+                        f"Vous avez : {data['PlayerTeam']['equipe']['guerrier']['nombre']} guerriers")
+                    print(f"Votre butin est de {data['PlayerTeam']['butin']}")
                     self.store_json(data)
                 else:
                     print("Votre butin est insuffisant")
-            elif(choix == 2):
-                if(data['butin'] >= 20):
-                    data['butin'] -= 20
-                    data['equipe']['chasseur'] += 5
+            elif (choix == 3):
+                if (data['PlayerTeam']['butin'] >= 25):
+                    data['PlayerTeam']['butin'] -= 25
+                    data['PlayerTeam']['equipe']['chasseur']['nombre'] += 1
                     print("Achat efféctué")
                     print(
-                        f"Vous avez : {data['equipe']['chasseur']} chasseurs")
-                    print(f"Votre butin est de {data['butin']}")
+                        f"Vous avez : {data['PlayerTeam']['equipe']['chasseur']['nombre']} chasseurs")
+                    print(f"Votre butin est de {data['PlayerTeam']['butin']}")
                     self.store_json(data)
                 else:
                     print("Votre butin est insuffisant")
-            elif(choix == 3):
-                if(data['butin'] >= 30):
-                    data['butin'] -= 30
-                    data['equipe']['magicien'] += 5
+            elif (choix == 2):
+                if (data['PlayerTeam']['butin'] >= 15):
+                    data['PlayerTeam']['butin'] -= 15
+                    data['PlayerTeam']['equipe']['magicien']['nombre'] += 1
                     print("Achat efféctué")
                     print(
-                        f"Vous avez : {data['equipe']['magicien']} magiciens")
-                    print(f"Votre butin est de {data['butin']}")
+                        f"Vous avez : {data['PlayerTeam']['equipe']['magicien']['nombre']} magiciens")
+                    print(f"Votre butin est de {data['PlayerTeam']['butin']}")
                     self.store_json(data)
                 else:
                     print("Votre butin est insuffisant")
@@ -143,7 +182,7 @@ class Game:
             print("Vous ne pouver pas faire d'achat en mode combat")
 
     def start_game(self):
-        print("Liste des actions possibles : exit, config, status, flee, start, buy")
+        print("Liste des actions possibles : exit, config, status, flee, start, buy, fight")
         action = input("Faite une action : ")
         while(action != "exit"):
             if(action == "config"):
